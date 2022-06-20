@@ -8,4 +8,3 @@ namespace DevFreela.API.Models
         public string Description { get; set; }
     }
 }
-
