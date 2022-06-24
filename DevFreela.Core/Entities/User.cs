@@ -24,8 +24,9 @@ namespace DevFreela.Core.Entities
         public DateTime CratedAt { get; private set; }
         public bool Active { get; private set; }
 
-        public List<UserSkill> Skills { get; private set; }
-        public List<Project> OwnedProjects { get; private set; }
-        public List<Project> FreelanceProjects { get; private set; }
+        public virtual List<UserSkill> Skills { get; private set; }
+        public virtual List<Project> OwnedProjects { get; private set; }
+        public virtual List<Project> FreelanceProjects { get; private set; }
+        public virtual List<ProjectComment> Comments { get; private set; }
     }
 }
