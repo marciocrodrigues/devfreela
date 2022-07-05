@@ -3,6 +3,7 @@ using DevFreela.Application.Services.Interfaces;
 using DevFreela.Application.ViewModels;
 using DevFreela.Core.Entities;
 using DevFreela.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -22,6 +23,7 @@ namespace DevFreela.Application.Services.Implementations
             var project = new Project(inputModel.Title, inputModel.Description, inputModel.IdClient, inputModel.IdFreelancer, inputModel.TotalCost);
 
             _dbContext.Projects.Add(project);
+            _dbContext.SaveChanges();
 
             return project.Id;
         }
@@ -31,6 +33,7 @@ namespace DevFreela.Application.Services.Implementations
             var comment = new ProjectComment(inputModel.Content, inputModel.IdProject, inputModel.IdUser);
 
             _dbContext.ProjectComments.Add(comment);
+            _dbContext.SaveChanges();
         }
 
         public void Delete(int id)
@@ -54,9 +57,19 @@ namespace DevFreela.Application.Services.Implementations
 
         public ProjectDetailViewModel GetById(int id)
         {
-            var project = _dbContext.Projects.SingleOrDefault(x => x.Id == id);
+            var project = _dbContext.Projects
+                .Include(p => p.Client)
+                .Include(p => p.Freelancer)
+                .SingleOrDefault(x => x.Id == id);
 
-            return new ProjectDetailViewModel(project.Id, project.Title, project.Description, project.StartedAt, project.FinishedAt, project.TotalCost);
+            return new ProjectDetailViewModel(project.Id, 
+                                              project.Title, 
+                                              project.Description, 
+                                              project.StartedAt, 
+                                              project.FinishedAt, 
+                                              project.TotalCost, 
+                                              project.Client.FullName, 
+                                              project.Freelancer.FullName);
         }
 
         public void Start(int id)
