@@ -1,37 +1,38 @@
 ﻿using DevFreela.API.Models;
-using DevFreela.Application.InputModels;
-using DevFreela.Application.Services.Interfaces;
+using DevFreela.Application.Commands.CreateUser;
+using DevFreela.Application.Queries.GetUser;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace DevFreela.API.Controllers
 {
     [Route("api/users")]
     public class UsersController : ControllerBase
     {
-        private readonly IUserService _userService;
+        private readonly IMediator _mediator;
 
-        public UsersController(IUserService userService)
+        public UsersController(IMediator mediator)
         {
-            _userService = userService;
+            _mediator = mediator;
         }
 
         [HttpGet("id")]
-        public IActionResult GetById(int id)
+        public async Task<IActionResult> GetById(int id)
         {
-            return Ok(_userService.GetById(id));
+            var query = new GetUserByIdQuery(id);
+
+            var user = await _mediator.Send(query);
+
+            return Ok(user);
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody] NewUserInputModel createUserModel)
+        public async Task<IActionResult> Post([FromBody] CreateUserCommand command)
         {
-            var id = _userService.Create(createUserModel);
+            var id = await _mediator.Send(command);
 
-            if (!string.IsNullOrEmpty(id.ToString()))
-            {
-                return BadRequest();
-            }
-
-            return CreatedAtAction(nameof(GetById), new { id = id }, createUserModel);
+            return CreatedAtAction(nameof(GetById), new { id = id }, command);
         }
 
         [HttpPost("{id}/login")]
