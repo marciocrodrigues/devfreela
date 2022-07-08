@@ -1,5 +1,5 @@
 ﻿using DevFreela.Core.Entities;
-using DevFreela.Infrastructure.Persistence;
+using DevFreela.Core.Repositories;
 using MediatR;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,19 +8,18 @@ namespace DevFreela.Application.Commands.CreateComment
 {
     public class CreateCommentCommandHandler : IRequestHandler<CreateCommentCommand, Unit>
     {
-        private readonly DevFreelaDbContext _dbContext;
+        private readonly IProjectRepository _projectRepsoitory;
 
-        public CreateCommentCommandHandler(DevFreelaDbContext dbContext)
+        public CreateCommentCommandHandler(IProjectRepository projectRepsoitory)
         {
-            _dbContext = dbContext;
+            _projectRepsoitory = projectRepsoitory;
         }
 
         public async Task<Unit> Handle(CreateCommentCommand request, CancellationToken cancellationToken)
         {
             var comment = new ProjectComment(request.Content, request.IdProject, request.IdUser);
 
-            await _dbContext.ProjectComments.AddAsync(comment);
-            await _dbContext.SaveChangesAsync();
+            await _projectRepsoitory.CreateProjectComment(comment);
 
             return Unit.Value;
         }
